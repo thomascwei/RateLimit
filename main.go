@@ -18,11 +18,16 @@ func webpage(w http.ResponseWriter, r *http.Request) {
 	// 判斷IP是否已被紀錄
 	if _, ok := IpHub[ip]; ok {
 		// 清除60秒前紀錄
+		find := false
 		for i, v := range IpHub[ip] {
 			if v >= now-60 {
 				IpHub[ip] = IpHub[ip][i:]
+				find = true
 				break
 			}
+		}
+		if !find {
+			IpHub[ip] = IpHub[ip][:0]
 		}
 		// 檢查當前長度, 超過顯示Error
 		if len(IpHub[ip]) >= 60 {
@@ -33,7 +38,7 @@ func webpage(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, strconv.Itoa(len(IpHub[ip])))
 			return
 		}
-	// 不存在的IP新增
+		// 不存在的IP新增
 	} else {
 		IpHub[ip] = []int64{now}
 		fmt.Fprintf(w, "1")
